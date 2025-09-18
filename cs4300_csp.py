@@ -68,8 +68,19 @@ def c_add10(x: str, y: str, cin: str, z: str, cout: str) -> Constraint:
         return True
     return Constraint(scope, pred, f"add10({x},{y},{cin}->{z},{cout})")
 
+def _select_mrv(order, idx, domains, assignment):
+    """
+    Pick the unassigned variable (from order[idx:]) having the fewest
+    remaining legal values in its domain.
+    """
+    candidates = [v for v in order[idx:] if v not in assignment]
+    # If everything at/after idx is already assigned (shouldn't happen), fall back
+    if not candidates:
+        return order[idx]
+    return min(candidates, key=lambda v: len(domains[v]))
+
 # ---------- Simple solver (BT + forward checking) ----------
-def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterable[Assignment]:
+def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None, use_mrv: bool=False) -> Iterable[Assignment]:
     domains = {v: list(ds) for v, ds in csp.domains.items()}
     order = var_order or list(domains.keys())
     cons_by_var: Dict[str, List[Constraint]] = {v: [] for v in domains}
@@ -90,30 +101,48 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
         if idx == len(order):
             yield dict(assignment)
             return
-        v = order[idx]
-        for val in domains[v]:
-            assignment[v] = val
-            if consistent_with_local(v, assignment):
-                # forward check
-                pruned = []
-                ok = True
-                for w in order[idx+1:]:
-                    removed = []
-                    for vv in list(domains[w]):
-                        assignment[w] = vv
-                        if not consistent_with_local(w, assignment):
-                            domains[w].remove(vv); removed.append(vv)
-                        del assignment[w]
-                    if removed:
-                        pruned.append((w, removed))
-                    if not domains[w]:
-                        ok = False; break
-                if ok:
-                    yield from backtrack(idx+1)
-                # undo pruning
-                for w, removed in pruned:
-                    domains[w].extend(removed)
-            del assignment[v]
+        
+        if use_mrv:
+            #Select the MRV variable fromt he remaining positions
+            v = _select_mrv(order, idx, domains, assignment)
+
+            j = order.index(v, idx)
+            #swap v into position
+            order[idx], order[j] = order[j], order[idx]
+            swapped = (j != idx)
+
+        else: swapped = False
+
+        try: 
+            v = order[idx]
+            for val in domains[v]:
+                assignment[v] = val
+                if consistent_with_local(v, assignment):
+                    # forward check
+                    pruned = []
+                    ok = True
+                    for w in order[idx+1:]:
+                        removed = []
+                        for vv in list(domains[w]):
+                            assignment[w] = vv
+                            if not consistent_with_local(w, assignment):
+                                domains[w].remove(vv); removed.append(vv)
+                            del assignment[w]
+                        if removed:
+                            pruned.append((w, removed))
+                        if not domains[w]:
+                            ok = False; break
+                    if ok:
+                        yield from backtrack(idx+1)
+                    # undo pruning
+                    for w, removed in pruned:
+                        domains[w].extend(removed)
+                del assignment[v]
+
+        finally:
+            if use_mrv and swapped:
+                j = order.index(v)
+                order[idx], order[j] = order[j], order[idx]
 
     yield from backtrack(0)
 

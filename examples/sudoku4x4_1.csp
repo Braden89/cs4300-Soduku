@@ -38,10 +38,12 @@ alldiff(R3C3,R3C4,R4C3,R4C4)
 
 # Clues (edit these to define your puzzle; 0 = omit)
 # Example clues:
+in(R1C1,[1])
 in(R1C3,[3])
 in(R1C4,[4])
 in(R2C1,[3])
 in(R2C2,[4])
+in(R2C4,[2])
 in(R3C3,[4])
 in(R3C4,[3])
 in(R4C1,[4])
