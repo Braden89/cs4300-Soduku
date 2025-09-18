@@ -1,0 +1,48 @@
+# 4x4 Sudoku — variables, domains
+VARS:
+R1C1: range(1,4)
+R1C2: range(1,4)
+R1C3: range(1,4)
+R1C4: range(1,4)
+R2C1: range(1,4)
+R2C2: range(1,4)
+R2C3: range(1,4)
+R2C4: range(1,4)
+R3C1: range(1,4)
+R3C2: range(1,4)
+R3C3: range(1,4)
+R3C4: range(1,4)
+R4C1: range(1,4)
+R4C2: range(1,4)
+R4C3: range(1,4)
+R4C4: range(1,4)
+
+CONS:
+# Row all-different
+alldiff(R1C1,R1C2,R1C3,R1C4)
+alldiff(R2C1,R2C2,R2C3,R2C4)
+alldiff(R3C1,R3C2,R3C3,R3C4)
+alldiff(R4C1,R4C2,R4C3,R4C4)
+
+# Column all-different
+alldiff(R1C1,R2C1,R3C1,R4C1)
+alldiff(R1C2,R2C2,R3C2,R4C2)
+alldiff(R1C3,R2C3,R3C3,R4C3)
+alldiff(R1C4,R2C4,R3C4,R4C4)
+
+# 2x2 block all-different (blocks: rows 1–2/3–4 × cols 1–2/3–4)
+alldiff(R1C1,R1C2,R2C1,R2C2)
+alldiff(R1C3,R1C4,R2C3,R2C4)
+alldiff(R3C1,R3C2,R4C1,R4C2)
+alldiff(R3C3,R3C4,R4C3,R4C4)
+
+# Clues (edit these to define your puzzle; 0 = omit)
+# Example clues:
+in(R1C3,[3])
+in(R1C4,[4])
+in(R2C1,[3])
+in(R2C2,[4])
+in(R3C3,[4])
+in(R3C4,[3])
+in(R4C1,[4])
+in(R4C2,[3])

@@ -1,6 +1,11 @@
 from cs4300_csp_parser import parse_cs4300
 from cs4300_csp import solve_backtracking
+
 print("[run_csp] boot")
+import sys, os
+print("[run_csp] __file__ =", __file__)
+print("[run_csp] argv     =", sys.argv)
+print("[run_csp] cwd      =", os.getcwd())
 
 
 
